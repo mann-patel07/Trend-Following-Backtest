@@ -17,7 +17,7 @@ One stock and one parameter pair isn't enough to draw a real conclusion from, so
 | Buy & Hold | 31.06% | -33.36% | 0.94 |
 | Strategy | 18.81% | -28.36% | 0.78 |
 
-![AAPL strategy vs buy-and-hold](images/equity_curve.png)
+![AAPL strategy vs buy-and-hold](Images/equity_curve.png)
 
 Buy-and-hold outperformed the strategy on both raw and risk-adjusted returns. The strategy made 18 round-trip trades over the period, spending about 65% of the time in the market. Transaction costs accounted for roughly 1.8% of cumulative return — verified directly in the notebook by comparing results with and without costs — so the underperformance is mainly about missed time in the market during recoveries, not trading fees.
 
@@ -34,7 +34,7 @@ Turns out this AAPL result wasn't a fluke of that one stock. Across the full swe
 
 So over 2019-2026, in this ticker universe, the strategy isn't just weak on AAPL — it's weak almost everywhere tested. See `Sweep_Analysis.ipynb` for the full breakdown, distribution plots, the parameter heatmap, and the per-ticker win rates.
 
-![Mean edge across the parameter grid](images/heatmap.png)
+![Mean edge across the parameter grid](Images/heatmap.png)
 
 ## A caveat on the sweep universe: survivorship bias
 
