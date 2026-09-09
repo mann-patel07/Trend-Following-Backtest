@@ -32,7 +32,7 @@ Turns out this AAPL result wasn't a fluke of that one stock. Across the full swe
 - A 95% bootstrap confidence interval on mean edge across tickers comes out to roughly **-9.4% to -6.2%**, entirely below zero.
 - Boeing (BA) is the one real exception, beating buy-and-hold in 63% of its parameter combinations — plausibly because it spent much of this window in extended drawdowns rather than a clean uptrend, which is closer to the kind of choppy price path trend-following is supposed to help with. Every other ticker, AAPL included, loses in the large majority of its combinations, and 19 of the 29 tickers never beat buy-and-hold in a single one of their 19 combinations.
 
-So over 2019-2026, in this ticker universe, the strategy isn't just weak on AAPL — it's weak almost everywhere tested. See `Sweep_Analysis.ipynb` for the full breakdown, distribution plots, the parameter heatmap, and the per-ticker win rates.
+So over 2019-2026, in this ticker universe, the strategy isn't just weak on AAPL — it's weak almost everywhere tested. See `2_Sweep_Analysis.ipynb` for the full breakdown, distribution plots, the parameter heatmap, and the per-ticker win rates.
 
 ![Mean edge across the parameter grid](Images/heatmap.png)
 
@@ -63,20 +63,20 @@ The 29 tickers in the sweep are today's liquid, still-listed large caps (see `sw
 ## File layout
 
 - `backtest.py` — the reusable backtest module (data loading/caching, the strategy itself, and the performance metrics)
-- `Backtesting_v1.ipynb` — the original AAPL-only notebook, unchanged
-- `Backtesting_v1_refactored.ipynb` — the same AAPL result, reproduced using `backtest.py` instead of one-off cells
+- `archive_original_v1.ipynb` — the original AAPL-only notebook, unchanged
+- `1_AAPL_Backtest.ipynb` — the same AAPL result, reproduced using `backtest.py` instead of one-off cells
 - `sweep.py` — runs the strategy across the 29-ticker × 19-parameter grid and writes `results/sweep_results.csv`
 - `results/sweep_results.csv` — one row per (ticker, short, long) cell: CAGR, Sharpe, max drawdown, and edge for strategy vs. buy-and-hold, plus trade stats
-- `Sweep_Analysis.ipynb` — reads the sweep results and reports the headline numbers, distribution, parameter heatmap, and per-ticker win rates
+- `2_Sweep_Analysis.ipynb` — reads the sweep results and reports the headline numbers, distribution, parameter heatmap, and per-ticker win rates
 - `data/` — cached price and T-bill CSVs, created on first run
 
 ## How to run
 
 1. Clone this repo
 2. Install dependencies: `pip install -r requirements.txt`
-3. Open `Backtesting_v1_refactored.ipynb` and run all cells for the AAPL-only result (or `Backtesting_v1.ipynb` for the original, unrefactored version)
+3. Open `1_AAPL_Backtest.ipynb` and run all cells for the AAPL-only result (or `archive_original_v1.ipynb` for the original, unrefactored version)
 4. Run `python sweep.py` to regenerate `results/sweep_results.csv` — this downloads 29 tickers plus the T-bill rate on first run (a couple of minutes), caching to `data/` so later runs are fast
-5. Open `Sweep_Analysis.ipynb` and run all cells to see the sweep results
+5. Open `2_Sweep_Analysis.ipynb` and run all cells to see the sweep results
 
 ## Tools
 
