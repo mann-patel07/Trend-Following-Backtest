@@ -14,8 +14,10 @@ One stock and one parameter pair isn't enough to draw a real conclusion from, so
 
 | | CAGR | Max Drawdown | Sharpe |
 |---|---|---|---|
-| Buy & Hold | 31.06% | -33.36% | 0.94 |
-| Strategy | 18.81% | -28.36% | 0.78 |
+| Buy & Hold | 31.04% | -33.36% | 0.94 |
+| Strategy | 18.80% | -28.36% | 0.78 |
+
+The archived v1 notebook reported 31.06%/18.81%; the small difference comes from a one-day CAGR-denominator fix made during the v2 refactor.
 
 ![AAPL strategy vs buy-and-hold](Images/equity_curve.png)
 
