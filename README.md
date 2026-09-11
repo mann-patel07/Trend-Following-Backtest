@@ -32,7 +32,7 @@ Turns out this AAPL result wasn't a fluke of that one stock. Across the full swe
 - The strategy beat buy-and-hold on CAGR in only **7.3%** of cells, and on Sharpe in **9.4%**.
 - AAPL's own 20/50 result sits at roughly the **18th percentile** of the edge distribution — worse than most cells in the sweep, not a lucky or unusually bad draw.
 - A 95% bootstrap confidence interval on mean edge across tickers comes out to roughly **-9.4% to -6.2%**, entirely below zero.
-- Boeing (BA) is the one real exception, beating buy-and-hold in 63% of its parameter combinations — plausibly because it spent much of this window in extended drawdowns rather than a clean uptrend, which is closer to the kind of choppy price path trend-following is supposed to help with. Every other ticker, AAPL included, loses in the large majority of its combinations, and 20 of the 29 tickers never beat buy-and-hold in a single one of their 19 combinations.
+- Boeing (BA) is the one real exception, beating buy-and-hold in 63% of its parameter combinations — plausibly because it spent much of this window in extended drawdowns rather than a clean uptrend, which is closer to the kind of choppy price path trend-following is supposed to help with. Every other ticker, AAPL included, loses in the large majority of its combinations, and 19 of the 29 tickers never beat buy-and-hold in a single one of their 19 combinations.
 
 So over 2019-2026, in this ticker universe, the strategy isn't just weak on AAPL — it's weak almost everywhere tested. See `2_Sweep_Analysis.ipynb` for the full breakdown, distribution plots, the parameter heatmap, and the per-ticker win rates.
 
