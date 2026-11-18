@@ -78,9 +78,11 @@ def backtest(prices, short, long, cost_bps=5.0, rf_daily=None):
     `position.diff().abs()` every time the position changes.
 
     Warm-up rows (before the `long`-day SMA is available) are dropped
-    before the position is computed, matching v1 — so the first remaining
-    row's position/strat_ret is NaN, since there's no prior-day signal left
-    in the frame to shift from.
+    before the position is computed. The first remaining row has no prior-day
+    signal to shift from, so the position starts flat (0) on that row. That
+    day earns the cash rate, and if the first signal is long, the entry cost
+    is charged on the next row, when the position becomes 1. Buy-and-hold and
+    the strategy therefore cover the same dates.
 
     Returns a DataFrame indexed like `prices` with columns: close,
     sma_short, sma_long, signal, position, ret, strat_ret, equity_bh
@@ -103,7 +105,7 @@ def backtest(prices, short, long, cost_bps=5.0, rf_daily=None):
         rf_daily = pd.Series(0.04 / 252, index=df.index)
     rf_daily = rf_daily.reindex(df.index).ffill()
 
-    df["position"] = df["signal"].shift(1)
+    df["position"] = df["signal"].shift(1).fillna(0)
     turnover = df["position"].diff().abs().fillna(0)
 
     gross_strat_ret = df["ret"] * df["position"] + rf_daily * (1 - df["position"])
@@ -117,8 +119,13 @@ def backtest(prices, short, long, cost_bps=5.0, rf_daily=None):
 
 
 def max_drawdown(cumulative_returns):
-    """Drawdown series and its minimum (most negative) value for an equity curve."""
-    peak = cumulative_returns.cummax()
+    """Drawdown series and its minimum (most negative) value for an equity curve.
+
+    The running peak starts at the starting capital of 1.0, so a loss in the
+    first days counts as a drawdown. The returned series keeps the index of
+    `cumulative_returns`.
+    """
+    peak = cumulative_returns.cummax().clip(lower=1.0)
     drawdown = (cumulative_returns - peak) / peak
     return drawdown, drawdown.min()
 
@@ -126,9 +133,9 @@ def max_drawdown(cumulative_returns):
 def cagr(cumulative_returns, periods_per_year=252):
     """Compound annual growth rate from a cumulative-return equity series.
 
-    Uses the count of actual (non-NaN) return periods, not raw row count,
-    so a series with a leading NaN (e.g. the lagged-position warm-up row in
-    `backtest`'s strategy curve) doesn't distort the annualization.
+    Uses the count of actual (non-NaN) return periods, not raw row count.
+    Both curves from `backtest` now have a value on every row, so this equals
+    the number of rows.
     """
     n_returns = cumulative_returns.count()
     n_years = n_returns / periods_per_year
