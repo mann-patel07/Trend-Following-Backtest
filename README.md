@@ -8,10 +8,6 @@ This project started by testing a simple trend-following strategy against AAPL s
 
 One stock and one parameter pair isn't enough to draw a real conclusion from, so v2 adds a sweep: the same strategy run across 29 tickers spanning eight sectors and 19 short/long window combinations each, to check whether the AAPL result is a general property of this kind of strategy or just AAPL's particular price path.
 
-## Changes in this version
-
-A code review found three problems in `backtest.py`: the first position was NaN, so the entry cost of a strategy that starts long was never charged; buy-and-hold had one more return day than the strategy; and `max_drawdown` took the running peak from the first equity value instead of the starting capital of 1.0. I fixed all three, added `tests/test_backtest.py`, and ran the sweep and both notebooks again on the frozen price files in `data/`. For AAPL 20/50 the strategy CAGR went from 18.80% to 18.78% and the average holding period from 61.8 to 58.5 trading days. Buy-and-hold, the strategy Sharpe ratio (0.78), the strategy max drawdown (-28.36%) and the share of cells where the strategy wins (7.3% on CAGR, 9.4% on Sharpe) did not change.
-
 ## Result
 
 ### AAPL, 20/50: the original test
@@ -34,9 +30,9 @@ The numbers come from the price files in `data/`, which were downloaded on 2026-
 Turns out this AAPL result wasn't a fluke of that one stock. Across the full sweep (29 tickers × 19 short/long combinations = 551 cells):
 
 - The strategy beat buy-and-hold on CAGR in only **7.3%** of cells, and on Sharpe in **9.4%**.
-- AAPL's own 20/50 result sits at roughly the **17th percentile** of the edge distribution. That is worse than most cells in the sweep, so it is not a lucky or unusually bad draw.
+- AAPL's own 20/50 result sits at roughly the **17th percentile** of the edge distribution. That is worse than about 83% of the cells in the sweep.
 - A 95% bootstrap confidence interval on mean edge across tickers comes out to roughly **-9.4% to -6.2%**, entirely below zero.
-- Boeing (BA) is the one real exception, beating buy-and-hold in 63% of its parameter combinations. It spent much of this window in extended drawdowns rather than a clean uptrend, which is closer to the kind of choppy price path trend-following is supposed to help with. Exxon (XOM) wins in 42% and Wells Fargo (WFC) in 26%. Every other ticker, AAPL included, wins in 16% of its combinations or fewer, and 20 of the 29 tickers never beat buy-and-hold in a single one of their 19 combinations.
+- Boeing (BA) is the one exception, beating buy-and-hold in 63% of its parameter combinations. I have not checked why Boeing is different. A long/flat rule can help in a long decline by staying out of the market, and with 551 cells one exception is expected by chance (see the multiple-testing item under What's next). Exxon (XOM) wins in 42% and Wells Fargo (WFC) in 26%. Every other ticker, AAPL included, wins in 16% of its combinations or fewer, and 20 of the 29 tickers never beat buy-and-hold in a single one of their 19 combinations.
 
 So over 2019-2026, in this ticker universe, the strategy is weak on AAPL and weak almost everywhere tested. See `2_Sweep_Analysis.ipynb` for the full breakdown, distribution plots, the parameter heatmap, and the per-ticker win rates.
 
@@ -50,7 +46,11 @@ For AAPL 20/50 the strategy CAGR goes from 18.78% to 20.45%, the Sharpe ratio fr
 
 ## A caveat on the sweep universe: survivorship bias
 
-The 29 tickers in the sweep are today's liquid, still-listed large caps (see `sweep.py` for the list). Anything that was delisted, went bankrupt, or got acquired during 2019-2026 isn't in this universe, so it skews toward "the market's winners" rather than a neutral cross-section of everything that existed in 2019. Every ticker is also tested over the exact same 2019-2026 window, which was a strong bull run for large-cap US equities generally. Treat the sweep's numbers as an upper bound on how well this strategy could have done, not a clean, unbiased estimate. Treat "the strategy loses in this universe, in this window" as the actual finding, not "the strategy loses, full stop."
+The 29 tickers in the sweep are today's liquid, still-listed large caps (see `sweep.py` for the list). Anything that was delisted, went bankrupt, or got acquired during 2019-2026 isn't in this universe, so it skews toward "the market's winners" rather than a neutral cross-section of everything that existed in 2019. Every ticker is also tested over the exact same 2019-2026 window, which was a strong bull run for large-cap US equities generally. The sweep's numbers likely look better than they would for a universe that included delisted firms, and I have not measured by how much. Treat "the strategy loses in this universe, in this window" as the actual finding, not "the strategy loses, full stop."
+
+## Changes in this version
+
+A code review found three problems in `backtest.py`: the first position was NaN, so the entry cost of a strategy that starts long was never charged; buy-and-hold had one more return day than the strategy; and `max_drawdown` took the running peak from the first equity value instead of the starting capital of 1.0. I fixed all three, added `tests/test_backtest.py`, and ran the sweep and both notebooks again on the frozen price files in `data/`. For AAPL 20/50 the strategy CAGR went from 18.80% to 18.78% and the average holding period from 61.8 to 58.5 trading days. Buy-and-hold, the strategy Sharpe ratio (0.78), the strategy max drawdown (-28.36%) and the share of cells where the strategy wins (7.3% on CAGR, 9.4% on Sharpe) did not change.
 
 ## What I did
 

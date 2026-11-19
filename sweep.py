@@ -28,9 +28,10 @@ COST_BPS = 5.0
 # large caps. Companies that were delisted, went bankrupt, or were acquired
 # during 2019-2026 aren't in this universe, so the sweep skews toward
 # "the market's winners" rather than a neutral cross-section of everything
-# that existed in 2019. Any edge found here is an upper bound, not a clean
-# estimate -- a survivorship-bias-free universe would need point-in-time
-# constituent data this project doesn't have.
+# that existed in 2019. Any edge found here likely looks better than it would
+# with delisted firms included, and I have not measured by how much -- a
+# survivorship-bias-free universe would need point-in-time constituent data
+# this project doesn't have.
 TICKERS = [
     # Consumer staples
     "KO", "PG", "WMT", "PEP", "COST",
