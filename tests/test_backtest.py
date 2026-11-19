@@ -121,3 +121,30 @@ def test_trade_stats_counts_a_first_day_long_as_an_entry():
     stats = bt.trade_stats(res["position"])
     assert stats["AvgHoldingDays"] == pytest.approx(res["position"].sum())  # one entry
     assert stats["RoundTripTrades"] == pytest.approx(0.5)  # entered, never exited
+
+
+def test_lag_two_position_is_the_signal_two_days_earlier():
+    rng = np.random.default_rng(1)
+    prices = series(100 * np.exp(np.cumsum(rng.normal(0, 0.01, 80))))
+    base = bt.backtest(prices, 3, 8, lag=2)
+    assert (base["position"].iloc[:2] == 0).all()
+    assert (base["position"].iloc[2:].to_numpy() == base["signal"].iloc[:-2].to_numpy()).all()
+    for k in (30, 50, 79):
+        changed = prices.copy()
+        changed.iloc[k] *= 1.5
+        alt = bt.backtest(changed, 3, 8, lag=2)
+        # a price on day k reaches the signal on day k and the position on day k + 2,
+        # so every position up to and including day k + 1 stays the same
+        day = prices.index[min(k + 1, 79)]
+        assert base["position"].loc[:day].equals(alt["position"].loc[:day])
+
+
+def test_default_lag_is_one():
+    rng = np.random.default_rng(2)
+    prices = series(100 * np.exp(np.cumsum(rng.normal(0, 0.01, 60))))
+    pd.testing.assert_frame_equal(bt.backtest(prices, 3, 8), bt.backtest(prices, 3, 8, lag=1))
+
+
+def test_lag_below_one_raises():
+    with pytest.raises(ValueError):
+        bt.backtest(rising(), 2, 3, lag=0)

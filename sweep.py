@@ -17,9 +17,9 @@ START = "2019-01-01"
 END = "2026-01-01"
 COST_BPS = 5.0
 
-# 29 liquid, large-cap US tickers spanning consumer staples, energy,
+# 28 liquid, large-cap US stocks spanning consumer staples, energy,
 # financials, healthcare, industrials, utilities, materials, and tech, plus
-# SPY as a broad-market benchmark. Deliberately not tech-heavy: AAPL is
+# SPY as a broad-market benchmark, 29 tickers in total. Deliberately not tech-heavy: AAPL is
 # included so the v1 20/50 result can be located inside this distribution,
 # but tech is otherwise capped at two names (AAPL, MSFT) so the sweep isn't
 # dominated by one sector's growth profile the way the AAPL-only v1 test was.
@@ -56,7 +56,7 @@ SHORT_WINDOWS = [5, 10, 20, 30, 50]
 LONG_WINDOWS = [50, 100, 150, 200]
 
 
-def run_sweep():
+def run_sweep(lag=1):
     """Backtest every (ticker, short, long) cell in the grid and return a results DataFrame."""
     rows = []
 
@@ -78,7 +78,7 @@ def run_sweep():
                 if short >= long:
                     continue
 
-                result = bt.backtest(prices, short, long, cost_bps=COST_BPS, rf_daily=rf_daily)
+                result = bt.backtest(prices, short, long, cost_bps=COST_BPS, rf_daily=rf_daily, lag=lag)
 
                 strat_summary = bt.summarize(
                     result["equity_strategy"], result["strat_ret"].dropna(), rf_daily

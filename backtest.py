@@ -1,4 +1,4 @@
-"""Moving-average crossover backtest, extracted from Backtesting_v1.ipynb.
+"""Moving-average crossover backtest, extracted from archive/archive_original_v1.ipynb.
 
 Same logic as v1's notebook cells, moved into reusable functions so v2's
 parameter sweep and analysis notebooks don't have to copy-paste it.
@@ -67,7 +67,7 @@ def load_risk_free(index, cache_dir="data", refresh=False):
     return rf_annual / 252
 
 
-def backtest(prices, short, long, cost_bps=5.0, rf_daily=None):
+def backtest(prices, short, long, cost_bps=5.0, rf_daily=None, lag=1):
     """Run a moving-average crossover backtest on a price series.
 
     Signal is 1 when the `short`-day SMA is above the `long`-day SMA, 0
@@ -84,6 +84,11 @@ def backtest(prices, short, long, cost_bps=5.0, rf_daily=None):
     is charged on the next row, when the position becomes 1. Buy-and-hold and
     the strategy therefore cover the same dates.
 
+    `lag` is the number of days between the signal and the position.
+    `lag=1` fills at the close of the signal day, which is the same close the
+    signal is computed from. `lag=2` fills at the next day's close. `lag`
+    must be an integer of 1 or more.
+
     Returns a DataFrame indexed like `prices` with columns: close,
     sma_short, sma_long, signal, position, ret, strat_ret, equity_bh
     (buy-and-hold cumulative return) and equity_strategy (strategy
@@ -91,6 +96,8 @@ def backtest(prices, short, long, cost_bps=5.0, rf_daily=None):
     """
     if short >= long:
         raise ValueError(f"short window ({short}) must be < long window ({long})")
+    if not isinstance(lag, int) or isinstance(lag, bool) or lag < 1:
+        raise ValueError(f"lag ({lag!r}) must be an integer of 1 or more")
 
     df = pd.DataFrame(index=prices.index)
     df["close"] = prices
@@ -105,7 +112,7 @@ def backtest(prices, short, long, cost_bps=5.0, rf_daily=None):
         rf_daily = pd.Series(0.04 / 252, index=df.index)
     rf_daily = rf_daily.reindex(df.index).ffill()
 
-    df["position"] = df["signal"].shift(1).fillna(0)
+    df["position"] = df["signal"].shift(lag).fillna(0)
     turnover = df["position"].diff().abs().fillna(0)
 
     gross_strat_ret = df["ret"] * df["position"] + rf_daily * (1 - df["position"])

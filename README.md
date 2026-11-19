@@ -1,6 +1,6 @@
 # Moving Average Crossover Backtest: AAPL and a 29-Ticker Sweep
 
-Python backtest comparing a 20/50-day moving average crossover strategy to buy-and-hold, starting on AAPL and then testing whether that result holds up across 29 tickers and 19 parameter combinations, with realistic transaction costs, actual historical risk-free rates, and risk-adjusted performance metrics.
+Python backtest comparing a 20/50-day moving average crossover strategy to buy-and-hold, starting on AAPL and then testing whether that result holds up across 29 tickers and 19 parameter combinations, with a 5 bps transaction cost on every trade, actual historical risk-free rates, and risk-adjusted performance metrics.
 
 ## What this is
 
@@ -42,6 +42,12 @@ So over 2019-2026, in this ticker universe, the strategy is weak on AAPL and wea
 
 ![Mean edge across the parameter grid](Images/heatmap.png)
 
+## Filling one day later
+
+The main results assume that each trade is filled at the close of the signal day. That close is also the price the signal is computed from, so a real order could not get exactly that price. I ran the same study again with each trade filled at the next day's close. `sweep_next_close.py` does this and writes `results/sweep_results_next_close.csv`.
+
+For AAPL 20/50 the strategy CAGR goes from 18.78% to 20.45%, the Sharpe ratio from 0.78 to 0.83 and the max drawdown from -28.36% to -23.21%. Buy-and-hold does not change, at 31.04% CAGR. Across the 551 cells the strategy beats buy-and-hold on CAGR in 6.9% of cells (7.3% in the main run) and on Sharpe in 10.3% (9.4%), and 19 of the 29 tickers never beat buy-and-hold on CAGR (20 in the main run). Both shares move by less than 2 percentage points, so the conclusion does not change. I only have daily closes, so I could not test a fill at the next day's open.
+
 ## A caveat on the sweep universe: survivorship bias
 
 The 29 tickers in the sweep are today's liquid, still-listed large caps (see `sweep.py` for the list). Anything that was delisted, went bankrupt, or got acquired during 2019-2026 isn't in this universe, so it skews toward "the market's winners" rather than a neutral cross-section of everything that existed in 2019. Every ticker is also tested over the exact same 2019-2026 window, which was a strong bull run for large-cap US equities generally. Treat the sweep's numbers as an upper bound on how well this strategy could have done, not a clean, unbiased estimate. Treat "the strategy loses in this universe, in this window" as the actual finding, not "the strategy loses, full stop."
@@ -57,12 +63,13 @@ The 29 tickers in the sweep are today's liquid, still-listed large caps (see `sw
 - Added a sanity check comparing the implied cost drag against the expected drag from the trade count, to verify the transaction cost logic was actually correct rather than just trusting the output
 - Used a ticker-level bootstrap (not a cell-level one) for the sweep's confidence interval. The 19 parameter combinations for one ticker are run on the same price series and are heavily correlated with each other, so treating each of the 551 rows as an independent sample would have understated the real uncertainty
 - Added `tests/test_backtest.py`, which checks `backtest.py` on small made-up price series where the answer is known by hand
+- Ran the sweep a second time with each trade filled at the next day's close (`sweep_next_close.py`), as an added check on the fill assumption
 
 ## Assumptions and limitations
 
 - Long/flat only, no short positions
 - Full capital committed on every trade, no partial position sizing
-- Fills happen at the closing price of the signal day, not the next day's open
+- Fills happen at the closing price of the signal day. A fill one day later is tested in "Filling one day later" above.
 - Cash return while out of the market uses the actual historical T-bill rate where available, falling back to a flat 4% estimate if that data can't be pulled
 - Prices and T-bill rates are cached to `data/`. The files in this repository were downloaded on 2026-09-02. Delete the cache or pass `refresh=True` to `load_prices`/`load_risk_free` to pull fresh data, which will change the numbers
 - Sweep universe has survivorship bias and is tested over a single historical window (see the caveat above)
@@ -74,6 +81,8 @@ The 29 tickers in the sweep are today's liquid, still-listed large caps (see `sw
 - `1_AAPL_Backtest.ipynb`: the same AAPL result, reproduced using `backtest.py` instead of one-off cells
 - `sweep.py`: runs the strategy across the 29-ticker × 19-parameter grid and writes `results/sweep_results.csv`
 - `results/sweep_results.csv`: one row per (ticker, short, long) cell: CAGR, Sharpe, max drawdown, and edge for strategy vs. buy-and-hold, plus trade stats
+- `sweep_next_close.py`: runs the same sweep with each trade filled one day later and writes `results/sweep_results_next_close.csv`
+- `results/sweep_results_next_close.csv`: the same columns as `results/sweep_results.csv`, for the fill one day later
 - `2_Sweep_Analysis.ipynb`: reads the sweep results and reports the headline numbers, distribution, parameter heatmap, and per-ticker win rates
 - `tests/test_backtest.py`: tests for `backtest.py`
 - `data/`: the 29 price CSVs and the T-bill CSV used by the code
@@ -88,7 +97,8 @@ The price files are in `data/`, so everything runs offline.
 3. Run `pytest`
 4. Open `1_AAPL_Backtest.ipynb` and run all cells for the AAPL-only result (or `archive/archive_original_v1.ipynb` for the original, unrefactored version, which downloads its own prices)
 5. Run `python sweep.py` to regenerate `results/sweep_results.csv`
-6. Open `2_Sweep_Analysis.ipynb` and run all cells to see the sweep results
+6. Run `python sweep_next_close.py` for the version with fills one day later
+7. Open `2_Sweep_Analysis.ipynb` and run all cells to see the sweep results
 
 Tested with Python 3.12.5 on macOS.
 
