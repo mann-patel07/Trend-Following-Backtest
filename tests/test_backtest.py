@@ -148,3 +148,25 @@ def test_default_lag_is_one():
 def test_lag_below_one_raises():
     with pytest.raises(ValueError):
         bt.backtest(rising(), 2, 3, lag=0)
+
+
+def test_empty_tbill_download_gives_the_flat_rate_and_no_cache_file(monkeypatch, tmp_path):
+    idx = series(np.arange(10) + 100.0).index
+    monkeypatch.setattr(bt.yf, "download", lambda *a, **k: pd.DataFrame())
+    with pytest.warns(UserWarning):
+        rf = bt.load_risk_free(idx, cache_dir=str(tmp_path))
+    assert (rf == 0.04 / 252).all()
+    assert list(rf.index) == list(idx)
+    assert list(tmp_path.iterdir()) == []
+
+
+def test_empty_cached_tbill_file_gives_the_flat_rate(monkeypatch, tmp_path):
+    idx = series(np.arange(10) + 100.0).index
+    cache = tmp_path / f"IRX_{idx.min():%Y-%m-%d}_{idx.max():%Y-%m-%d}.csv"
+    monkeypatch.setattr(bt.yf, "download", lambda *a, **k: pytest.fail("the download must not run"))
+    for text in ("", "Date,Close\n"):
+        cache.write_text(text)
+        with pytest.warns(UserWarning):
+            rf = bt.load_risk_free(idx, cache_dir=str(tmp_path))
+        assert (rf == 0.04 / 252).all()
+

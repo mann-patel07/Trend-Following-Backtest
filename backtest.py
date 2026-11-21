@@ -41,29 +41,51 @@ def load_risk_free(index, cache_dir="data", refresh=False):
 
     Downloads once for the date span covered by `index` and caches to CSV
     the same way `load_prices` does. If the download fails for any reason,
-    falls back to a flat 4% annual rate, matching v1's fallback behavior.
+    or returns an empty frame or no usable `Close` values, or the cached file
+    is empty or has no usable values, falls back to a flat 4% annual rate,
+    matching v1's fallback behavior. An empty download is not cached.
     Returns a daily rate series (annual rate / 252) reindexed and
-    forward-filled onto `index`.
+    forward-filled onto `index`. If the first dates of `index` come before the
+    first available rate, they get that first rate (back-filled) and a warning
+    gives the number of days filled.
     """
     os.makedirs(cache_dir, exist_ok=True)
     start = index.min().strftime("%Y-%m-%d")
     end = index.max().strftime("%Y-%m-%d")
     cache_path = os.path.join(cache_dir, f"IRX_{start}_{end}.csv")
+    flat = pd.Series(0.04 / 252, index=index)
 
     if os.path.exists(cache_path) and not refresh:
-        irx_close = pd.read_csv(cache_path, index_col=0, parse_dates=True)["Close"]
+        try:
+            irx_close = pd.read_csv(cache_path, index_col=0, parse_dates=True)["Close"]
+        except Exception as e:
+            warnings.warn(f"cached T-bill file could not be read ({e}), falling back to flat 4% annual rate")
+            return flat
+        if irx_close.dropna().empty:
+            warnings.warn("cached T-bill file has no usable values, falling back to flat 4% annual rate")
+            return flat
     else:
         try:
             irx = yf.download("^IRX", start=start, end=end, auto_adjust=True, progress=False)
             if isinstance(irx.columns, pd.MultiIndex):
                 irx.columns = irx.columns.droplevel(1)
+            if irx.empty or "Close" not in irx.columns or irx["Close"].dropna().empty:
+                warnings.warn("T-bill download returned no usable values, falling back to flat 4% annual rate")
+                return flat
             irx_close = irx["Close"].rename("Close")
             irx_close.to_csv(cache_path)
         except Exception as e:
             warnings.warn(f"T-bill download failed ({e}), falling back to flat 4% annual rate")
-            return pd.Series(0.04 / 252, index=index)
+            return flat
 
     rf_annual = irx_close.reindex(index).ffill() / 100
+    n_missing = int(rf_annual.isna().sum())
+    if n_missing:
+        rf_annual = rf_annual.bfill()
+        if rf_annual.isna().any():
+            warnings.warn("T-bill rates do not overlap the dates, falling back to flat 4% annual rate")
+            return flat
+        warnings.warn(f"{n_missing} days at the start had no T-bill rate and were filled with the first available rate")
     return rf_annual / 252
 
 
