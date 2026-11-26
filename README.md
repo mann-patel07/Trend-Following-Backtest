@@ -1,4 +1,4 @@
-# Moving Average Crossover Backtest: AAPL and a 29-Ticker Sweep
+# Moving average crossover backtest: AAPL and a 29-ticker sweep
 
 Python backtest comparing a 20/50-day moving average crossover strategy to buy-and-hold, starting on AAPL and then testing whether that result holds up across 29 tickers and 19 parameter combinations, with a 5 bps transaction cost on every trade, actual historical risk-free rates, and risk-adjusted performance metrics.
 
@@ -21,7 +21,7 @@ The archived v1 notebook reported 31.06%/18.81%. The small difference comes from
 
 ![AAPL strategy vs buy-and-hold](Images/equity_curve.png)
 
-Buy-and-hold outperformed the strategy on both raw and risk-adjusted returns. The strategy made 18 round-trip trades over the period and one more position was still open at the end of the data. It spent about 65% of the time in the market. Transaction costs accounted for roughly 1.9% of cumulative return (verified directly in the notebook by comparing results with and without costs), so the underperformance is mainly about missed time in the market during recoveries, not trading fees.
+Buy-and-hold outperformed the strategy on both raw and risk-adjusted returns. The strategy made 18 round-trip trades over the period and one more position was still open at the end of the data. It spent about 65% of the time in the market. Transaction costs accounted for roughly 1.9% of cumulative return (verified directly in the notebook by comparing results with and without costs), so trading fees explain only a small part of the gap. Most of it comes from days out of the market while the stock was rising.
 
 The numbers come from the price files in `data/`, which were downloaded on 2026-09-02. The code reads those files, so a re-run gives the same numbers.
 
@@ -32,7 +32,7 @@ Turns out this AAPL result wasn't a fluke of that one stock. Across the full swe
 - The strategy beat buy-and-hold on CAGR in only **7.3%** of cells, and on Sharpe in **9.4%**.
 - AAPL's own 20/50 result sits at roughly the **17th percentile** of the edge distribution. That is worse than about 82% of the cells in the sweep.
 - A 95% bootstrap confidence interval on mean edge across tickers comes out to roughly **-9.4% to -6.2%**, entirely below zero.
-- Boeing (BA) is the one exception, beating buy-and-hold in 63% of its parameter combinations. I have not checked why Boeing is different. A long/flat rule can help in a long decline by staying out of the market, and with 551 cells one exception is expected by chance (see the multiple-testing item under What's next). Exxon (XOM) wins in 42% and Wells Fargo (WFC) in 26%. Every other ticker, AAPL included, wins in 16% of its combinations or fewer, and 20 of the 29 tickers never beat buy-and-hold in a single one of their 19 combinations.
+- Boeing (BA) is the one exception, beating buy-and-hold in 63% of its parameter combinations. I have not checked why Boeing is different. A long/flat rule can help in a long decline by staying out of the market, and with 551 cells one exception can happen by chance (see the multiple-testing item under What's next). Exxon (XOM) wins in 42% and Wells Fargo (WFC) in 26%. Every other ticker, AAPL included, wins in 16% of its combinations or fewer, and 20 of the 29 tickers never beat buy-and-hold in a single one of their 19 combinations.
 
 So over 2019 to 2025, in this ticker universe, the strategy gives up return on AAPL and almost everywhere tested. It does lower risk: its maximum drawdown is smaller than buy-and-hold's in 70.8% of the 551 cells, and its Sharpe ratio is above zero in 67.9%. It mostly trades return for a smaller drawdown. See `2_Sweep_Analysis.ipynb` for the full breakdown, distribution plots, the parameter heatmap, and the per-ticker win rates.
 
