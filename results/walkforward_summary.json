@@ -1,0 +1,29 @@
+{
+  "n_tickers": 29,
+  "wf_beats_bh_sharpe": 3,
+  "wf_beats_bh_cagr": 2,
+  "wf_beats_bh_drawdown": 11,
+  "sign_test_p_sharpe": 1.5236437320709229e-05,
+  "median_wf_minus_bh_cagr": -0.09424914106386895,
+  "median_wf_minus_bh_sharpe": -0.34035061861702787,
+  "median_wf_minus_hindsight_cagr": -0.07034180639122467,
+  "wf_beats_fixed_cagr": 16,
+  "wf_beats_fixed_sharpe": 16,
+  "aapl": {
+    "ticker": "AAPL",
+    "wf_cagr": 0.002875513564947,
+    "wf_sharpe": -0.05013445640117,
+    "wf_max_drawdown": -0.330818218396847,
+    "bh_cagr": 0.161170477935341,
+    "bh_sharpe": 0.559590532524828,
+    "bh_max_drawdown": -0.333605255946862,
+    "fixed_20_50_cagr": 0.05705860836433,
+    "fixed_20_50_sharpe": 0.218405430776511,
+    "fixed_20_50_max_drawdown": -0.283638870670559,
+    "hindsight_best_pair": "10/200",
+    "hindsight_best_cagr": 0.128058276898789,
+    "wf_pct_days_in_market": 61.51394422310757,
+    "wf_round_trips": 17.0,
+    "wf_pair_changes": 3
+  }
+}
