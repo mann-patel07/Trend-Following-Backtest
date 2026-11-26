@@ -4,7 +4,7 @@ Python backtest comparing a 20/50-day moving average crossover strategy to buy-a
 
 ## What this is
 
-This project started by testing a simple trend-following strategy against AAPL stock data from 2019 to 2026, comparing it to just buying and holding the stock. The strategy generates a buy signal when a short-term moving average crosses above a long-term moving average, and a sell signal when it crosses below.
+This project started by testing a simple trend-following strategy against AAPL stock data from 2019 through 2025, comparing it to just buying and holding the stock. The strategy generates a buy signal when a short-term moving average crosses above a long-term moving average, and a sell signal when it crosses below.
 
 One stock and one parameter pair isn't enough to draw a real conclusion from, so v2 adds a sweep: the same strategy run across 29 tickers spanning eight sectors and 19 short/long window combinations each, to check whether the AAPL result is a general property of this kind of strategy or just AAPL's particular price path.
 
@@ -30,11 +30,11 @@ The numbers come from the price files in `data/`, which were downloaded on 2026-
 Turns out this AAPL result wasn't a fluke of that one stock. Across the full sweep (29 tickers × 19 short/long combinations = 551 cells):
 
 - The strategy beat buy-and-hold on CAGR in only **7.3%** of cells, and on Sharpe in **9.4%**.
-- AAPL's own 20/50 result sits at roughly the **17th percentile** of the edge distribution. That is worse than about 83% of the cells in the sweep.
+- AAPL's own 20/50 result sits at roughly the **17th percentile** of the edge distribution. That is worse than about 82% of the cells in the sweep.
 - A 95% bootstrap confidence interval on mean edge across tickers comes out to roughly **-9.4% to -6.2%**, entirely below zero.
 - Boeing (BA) is the one exception, beating buy-and-hold in 63% of its parameter combinations. I have not checked why Boeing is different. A long/flat rule can help in a long decline by staying out of the market, and with 551 cells one exception is expected by chance (see the multiple-testing item under What's next). Exxon (XOM) wins in 42% and Wells Fargo (WFC) in 26%. Every other ticker, AAPL included, wins in 16% of its combinations or fewer, and 20 of the 29 tickers never beat buy-and-hold in a single one of their 19 combinations.
 
-So over 2019-2026, in this ticker universe, the strategy is weak on AAPL and weak almost everywhere tested. See `2_Sweep_Analysis.ipynb` for the full breakdown, distribution plots, the parameter heatmap, and the per-ticker win rates.
+So over 2019 to 2025, in this ticker universe, the strategy gives up return on AAPL and almost everywhere tested. It does lower risk: its maximum drawdown is smaller than buy-and-hold's in 70.8% of the 551 cells, and its Sharpe ratio is above zero in 67.9%. It mostly trades return for a smaller drawdown. See `2_Sweep_Analysis.ipynb` for the full breakdown, distribution plots, the parameter heatmap, and the per-ticker win rates.
 
 ![Mean edge across the parameter grid](Images/heatmap.png)
 
@@ -46,7 +46,7 @@ For AAPL 20/50 the strategy CAGR goes from 18.78% to 20.45%, the Sharpe ratio fr
 
 ## A caveat on the sweep universe: survivorship bias
 
-The 29 tickers in the sweep are today's liquid, still-listed large caps (see `sweep.py` for the list). Anything that was delisted, went bankrupt, or got acquired during 2019-2026 isn't in this universe, so it skews toward "the market's winners" rather than a neutral cross-section of everything that existed in 2019. Every ticker is also tested over the exact same 2019-2026 window, which was a strong bull run for large-cap US equities generally. The sweep's numbers likely look better than they would for a universe that included delisted firms, and I have not measured by how much. Treat "the strategy loses in this universe, in this window" as the actual finding, not "the strategy loses, full stop."
+The 29 tickers in the sweep are today's liquid, still-listed large caps (see `sweep.py` for the list). Anything that was delisted, went bankrupt, or got acquired during 2019 to 2025 isn't in this universe, so it skews toward "the market's winners" rather than a neutral cross-section of everything that existed in 2019. Every ticker is also tested over the exact same 2019 to 2025 window, which was a strong bull run for large-cap US equities generally. The sweep's numbers likely look better than they would for a universe that included delisted firms, and I have not measured by how much. Treat "the strategy loses in this universe, in this window" as the actual finding, not "the strategy loses, full stop."
 
 ## Changes in this version
 
